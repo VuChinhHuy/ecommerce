@@ -1,19 +1,22 @@
 
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:banner_carousel/banner_carousel.dart';
 import 'package:dio/dio.dart';
+import 'package:ecommerce/api/category/category_bloc.dart';
+import 'package:ecommerce/api/category/category_response.dart';
+import 'package:ecommerce/api/product/product_bloc.dart';
+import 'package:ecommerce/api/product/product_response.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/category.dart';
-import 'package:ecommerce/utils/rest_client.dart';
+import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/wigdet/appbar.dart';
+import 'package:ecommerce/wigdet/build_load.dart';
 import 'package:ecommerce/wigdet/item_product_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -24,27 +27,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Category> category = List.empty();
+  List<Product> listProduct = List.empty();
+  
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getCategory();
+    setState(() {
+      blocCategory.getCategory();
+      blocProduct.getProduct();
+    });
   }
 
-  getCategory() async{
-    RestClient().init('http://khoaluantotnghiep.tk/api/categories');
-    Dio _dio = RestClient.getDio();
-
-    Response response = await _dio
-        .get(_dio.options.baseUrl,
-        options: Options(
-            headers: {'Content-Type': 'application/json'},
-            contentType: 'application/json',
-            ));
-
-    // category = (r.data as List).map((e) => Category.fromJson(e)).toList();
-    print(response.requestOptions.data);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,18 +96,40 @@ class _HomePageState extends State<HomePage> {
                           child: Text('See all')),
                     ],
                   ),
-                  Container(
-                    height: 70.w,
-                    width: double.infinity,
-                    padding: EdgeInsets.all(10.w),
-                    child: _builListCategory(),
-                  ),
+                  // build Category
+                   StreamBuilder<CategoryResponse>(
+                      stream: blocCategory.subject.stream,
+                      builder: (context, AsyncSnapshot<CategoryResponse> snapshot){
+                        if(snapshot.hasData){
+                          List<Category> categories = snapshot.data!.list;
+                          category = categories.where((element) => element.icon.toString().contains('null')==false).toList();
+                          return Container(
+                              height: 100.w,
+                              width: double.infinity,
+                              padding: EdgeInsets.all(8.w),
+                              child: _builListCategory()
+                          );
+                        }
+                        else {
+                          return buildLoadingWidget();
+                        }
+                      },
+                    ),
                   Text('Featured',style: GoogleFonts.mukta(fontWeight: FontWeight.bold,fontSize: 19.t),),
                 ],
               ),
             ),
-            Container(
-              child: _buildGirdView(),
+            StreamBuilder<ProductResponse>(stream: blocProduct.subject.stream,
+              builder: (context, AsyncSnapshot<ProductResponse> snapshot){
+                print(snapshot.data);
+                if(snapshot.hasData){
+                  listProduct = snapshot.data!.list;
+                  List<Product> proudct = listProduct.where((e) => e.deleted == false).toList();
+                  return _buildGirdView(proudct);
+                }
+                else
+                  return buildLoadingWidget();
+              },
             )
           ],
         )
@@ -122,11 +138,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildGirdView()=>GridView.builder(
-      itemCount: 100,
+  Widget _buildGirdView(List<Product> product)=>GridView.builder(
+      itemCount: product.length,
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics:  const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 5,
@@ -134,8 +150,8 @@ class _HomePageState extends State<HomePage> {
           mainAxisExtent: 300,
       ),
       itemBuilder: (BuildContext context, int index){
-        return const Center(
-          child: ProductCart(isFavorite: false),
+        return Center(
+          child: ProductCart(product: product[index]),
         );
       },
   );
@@ -143,13 +159,19 @@ class _HomePageState extends State<HomePage> {
     itemCount: category.length,
       scrollDirection: Axis.horizontal,
       itemBuilder: (BuildContext context, int index){
-        return Column(
+        return Container(
+          width: 100.w,
+          height: 100.w,
+          padding: EdgeInsets.only(right: 12.w),
+          child:
+          Column(
           children: [
-            Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/category/${category[index].icon}',
+            Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/categories/${category[index].icon!}',
             height: 50.w,
             width: 50.w),
-            Text('${category[index].name}'),
+             Text('${category[index].name}',maxLines: 2,textAlign: TextAlign.center),
           ],
-        ); 
+        )
+        );
       });
 }

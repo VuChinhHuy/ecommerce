@@ -1,32 +1,38 @@
+
 import 'dart:ui';
 
 import 'package:ecommerce/dimens.dart';
+import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/ui/product_details.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:simple_star_rating/simple_star_rating.dart';
+import 'package:intl/intl.dart';
 
 class ProductCart extends StatefulWidget {
-  const ProductCart({Key? key,required this.isFavorite}) : super(key: key);
-  final bool isFavorite;
+  const ProductCart({Key? key,required this.product}) : super(key: key);
+  final Product product;
   @override
   _ProductCartState createState() => _ProductCartState();
 }
 
 class _ProductCartState extends State<ProductCart> {
   late bool _isFavorite = false;
+  late Product product = Product();
+  var f = NumberFormat('#,###', 'en_US');
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _isFavorite = widget.isFavorite;
+    _isFavorite = false;
+    product = widget.product;
   }
   @override
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ProductDetail()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ProductDetail(productDetails: product)));
         },
         child: Card(
           elevation: 2.0,
@@ -42,7 +48,7 @@ class _ProductCartState extends State<ProductCart> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                      Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/products/${product.thumbnailUrl}',
                         width: 163.w,
                         height: 163.w,
                       ),
@@ -51,7 +57,7 @@ class _ProductCartState extends State<ProductCart> {
                       SimpleStarRating(
                         allowHalfRating: true,
                         starCount: 5,
-                        rating: 4.0,
+                        rating: (product.purchases! + 1.0),
                         size: 10.w,
                         isReadOnly: true,
                         onRated: (rate) {
@@ -60,11 +66,11 @@ class _ProductCartState extends State<ProductCart> {
                         spacing: 10,
                       ),
                       SizedBox(height: 8.w),
-                      Text('Saodimallsu Womens Turtleneck Oversized...',
+                      Text('${product.name}',
                         style: GoogleFonts.nunito(fontSize: 17.t),maxLines: 2
                         ,),
                       SizedBox(height: 8.w),
-                      Text('100000 VND',style: GoogleFonts.sansita(fontSize: 17.t),),
+                      Text('${f.format(product.price)} VND',style: GoogleFonts.sansita(fontSize: 17.t),),
 
                     ],
                   ),

@@ -12,7 +12,7 @@ class Account {
       int? id, 
       String? username, 
       String? password, 
-      bool? active, 
+      int? active,
       String? role, 
       String? salt, 
       String? createdAt, 
@@ -40,7 +40,7 @@ class Account {
   int? _id;
   String? _username;
   String? _password;
-  bool? _active;
+  int? _active;
   String? _role;
   String? _salt;
   String? _createdAt;
@@ -49,7 +49,7 @@ class Account {
   int? get id => _id;
   String? get username => _username;
   String? get password => _password;
-  bool? get active => _active;
+  int? get active => _active;
   String? get role => _role;
   String? get salt => _salt;
   String? get createdAt => _createdAt;

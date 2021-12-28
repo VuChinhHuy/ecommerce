@@ -1,4 +1,5 @@
 import 'package:ecommerce/dimens.dart';
+import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/wigdet/item_product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -68,7 +69,7 @@ class _FavoritePageState extends State<FavoritePage> {
     ),
     itemBuilder: (BuildContext context, int index){
       return const Center(
-        child: ProductCart(isFavorite: true,),
+        // child: ProductCart(product: Product()),
       );
     },
   );

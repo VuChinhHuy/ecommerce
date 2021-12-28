@@ -10,7 +10,7 @@
 class Category {
   Category({
       int? id, 
-      String? parent, 
+      dynamic parent,
       String? name, 
       bool? deleted, 
       String? icon, 
@@ -38,7 +38,7 @@ class Category {
     _updatedAt = json['updatedAt'];
   }
   int? _id;
-  String? _parent;
+  dynamic _parent;
   String? _name;
   bool? _deleted;
   String? _icon;
@@ -47,7 +47,7 @@ class Category {
   String? _updatedAt;
 
   int? get id => _id;
-  String? get parent => _parent;
+  dynamic get parent => _parent;
   String? get name => _name;
   bool? get deleted => _deleted;
   String? get icon => _icon;

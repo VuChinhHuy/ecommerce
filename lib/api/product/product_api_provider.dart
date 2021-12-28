@@ -1,14 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:ecommerce/api/product/product_response.dart';
 import 'package:ecommerce/model/product.dart';
+import 'package:ecommerce/utils/rest_client.dart';
 
 
 
 class ProductApiProvider{
-  final String url ="http://khoaluantotnghiep.tk/api/products";
-  final Dio _dio = Dio();
+
 
   Future<ProductResponse> getProduct() async{
+    String url ="/products";
+    Dio _dio = RestClient.getDio();
     Response response =  await _dio.get(url);
     return ProductResponse.fromJson(response.data);
   }
