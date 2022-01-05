@@ -1,4 +1,6 @@
+import 'package:ecommerce/model/seller.dart';
 import 'package:ecommerce/wigdet/appbar.dart';
+import 'package:ecommerce/wigdet/item_shop_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +16,7 @@ class _ShopPageState extends State<ShopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
-      body: Center(
-        child: Text('Shop'),
-      ),
+      body: ShopCard(shop: new Seller()),
     );
   }
 }

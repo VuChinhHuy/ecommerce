@@ -11,34 +11,41 @@ class ItemReview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text('${item.customer?.lastName}',
-        style: GoogleFonts.nunito(fontSize: 16.t,fontWeight: FontWeight.bold),
-      ),
-      Row(
-        children: [
-          Expanded(child:
-          SimpleStarRating(
-            allowHalfRating: true,
-            starCount: 5,
-            rating: item.rating!.toDouble(),
-            size: 12.w,
-            isReadOnly: true,
-            onRated: (rate) {
+    return  Card(
+      elevation: 8.w,
+       child: Padding(
+         padding: EdgeInsets.all(5.w),
+         child: Column(
+           mainAxisAlignment: MainAxisAlignment.start,
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             Text('${item.customer?.firstName} ${item.customer?.middleName} ${item.customer?.lastName}',
+               style: GoogleFonts.nunito(fontSize: 16.t,fontWeight: FontWeight.bold),
+             ),
+             Row(
+               children: [
+                 Expanded(child:
+                 SimpleStarRating(
+                   allowHalfRating: true,
+                   starCount: 5,
+                   rating: item.rating!.toDouble(),
+                   size: 12.w,
+                   isReadOnly: true,
+                   onRated: (rate) {
 
-            },
-            spacing: 10,)),
-          Text('${item.createdAt}',style: GoogleFonts.nunito(fontSize: 14.t),),
-        ],
-      ),
-      SizedBox(height: 16.w),
-      Text('${item.content}',
-          style: GoogleFonts.nunito(fontSize: 14.t)
-      ),
-    ],
+                   },
+                   spacing: 10,)),
+                 Text('${item.createdAt}',style: GoogleFonts.nunito(fontSize: 14.t),),
+               ],
+             ),
+             SizedBox(height: 16.w),
+             Text('${item.content}',
+                 style: GoogleFonts.nunito(fontSize: 14.t)
+             ),
+           ],
+         ),
+       )
     );
+
   }
 }

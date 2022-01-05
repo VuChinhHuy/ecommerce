@@ -3,7 +3,9 @@ import 'dart:ui';
 
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/product.dart';
+import 'package:ecommerce/sql/favorite_enity.dart';
 import 'package:ecommerce/ui/product_details.dart';
+import 'package:ecommerce/utils/on_click.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,8 +13,9 @@ import 'package:simple_star_rating/simple_star_rating.dart';
 import 'package:intl/intl.dart';
 
 class ProductCart extends StatefulWidget {
-  const ProductCart({Key? key,required this.product}) : super(key: key);
+  const ProductCart({Key? key,required this.product,required this.isFavorite}) : super(key: key);
   final Product product;
+  final bool isFavorite;
   @override
   _ProductCartState createState() => _ProductCartState();
 }
@@ -25,14 +28,14 @@ class _ProductCartState extends State<ProductCart> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _isFavorite = false;
+    _isFavorite = widget.isFavorite;
     product = widget.product;
   }
   @override
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ProductDetail(productDetails: product)));
+          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ProductDetail(productDetails: widget.product)));
         },
         child: Card(
           elevation: 2.0,
@@ -88,6 +91,7 @@ class _ProductCartState extends State<ProductCart> {
                               onPressed: (){
                                 _isFavorite = !_isFavorite;
                                 setState(() {
+                                  onCLickFavorite(FavoriteSQL(product.id!, product.name!));
 
                                 });
                               },

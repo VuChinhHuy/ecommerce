@@ -1,4 +1,8 @@
 
+import 'package:ecommerce/sql/favorite_responstory.dart';
+import 'package:ecommerce/ui/homepage.dart';
+import 'package:ecommerce/ui/product_details.dart';
+import 'package:ecommerce/ui/shoppage.dart';
 import 'package:ecommerce/ui/signuppage.dart';
 import 'package:ecommerce/utils/rest_client.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +14,18 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     RestClient().init('http://khoaluantotnghiep.tk/api');
+    DataResponse().initDatabase();
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/homepage':(context) => HomePage(),
+        '/shoppage':(context) => ShopPage(),
+      },
       // title: 'Flutter Demo',
       // theme: ThemeData(
       //   // This is the theme of your application.

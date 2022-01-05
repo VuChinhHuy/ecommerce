@@ -34,9 +34,20 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
     setState(() {
-      blocCategory.getCategory();
-      blocProduct.getProduct();
+      if(!blocCategory.subject.isClosed){
+        blocCategory.getCategory();
+      }
+      if(!blocCategory.subject.isClosed){
+        blocProduct.getProduct();
+      }
     });
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    blocProduct.dispose();
+    blocCategory.dispose();
   }
 
 
@@ -44,6 +55,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
+      drawer:  StreamBuilder<CategoryResponse>(
+        stream: blocCategory.subject.stream,
+        builder: (context, AsyncSnapshot<CategoryResponse> snapshot){
+          if(snapshot.hasData){
+            List<Category> categories = snapshot.data!.list;
+            category = categories.where((element) => element.parent == null && element.deleted == false).toList();
+            return buildDrawer(category);
+          }
+          else {
+            return buildLoadingWidget();
+          }
+        },
+      ),
       body: SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -87,34 +111,34 @@ class _HomePageState extends State<HomePage> {
                       // ],
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(child: Text('Catalogue',style: GoogleFonts.mukta(fontWeight: FontWeight.bold,fontSize: 19.t),)),
-                      MaterialButton(onPressed: (){},
-                          height: 23.w,
-                          child: Text('See all')),
-                    ],
-                  ),
-                  // build Category
-                   StreamBuilder<CategoryResponse>(
-                      stream: blocCategory.subject.stream,
-                      builder: (context, AsyncSnapshot<CategoryResponse> snapshot){
-                        if(snapshot.hasData){
-                          List<Category> categories = snapshot.data!.list;
-                          category = categories.where((element) => element.icon.toString().contains('null')==false).toList();
-                          return Container(
-                              height: 100.w,
-                              width: double.infinity,
-                              padding: EdgeInsets.all(8.w),
-                              child: _builListCategory()
-                          );
-                        }
-                        else {
-                          return buildLoadingWidget();
-                        }
-                      },
-                    ),
+                  // Row(
+                  //   crossAxisAlignment: CrossAxisAlignment.center,
+                  //   children: [
+                  //     Expanded(child: Text('Catalogue',style: GoogleFonts.mukta(fontWeight: FontWeight.bold,fontSize: 19.t),)),
+                  //     MaterialButton(onPressed: (){},
+                  //         height: 23.w,
+                  //         child: Text('See all')),
+                  //   ],
+                  // ),
+                  // // build Category
+                  //  StreamBuilder<CategoryResponse>(
+                  //     stream: blocCategory.subject.stream,
+                  //     builder: (context, AsyncSnapshot<CategoryResponse> snapshot){
+                  //       if(snapshot.hasData){
+                  //         List<Category> categories = snapshot.data!.list;
+                  //         category = categories.where((element) => element.icon.toString().contains('null')==false).toList();
+                  //         return Container(
+                  //             height: 100.w,
+                  //             width: double.infinity,
+                  //             padding: EdgeInsets.all(8.w),
+                  //             child: _builListCategory()
+                  //         );
+                  //       }
+                  //       else {
+                  //         return buildLoadingWidget();
+                  //       }
+                  //     },
+                  //   ),
                   Text('Featured',style: GoogleFonts.mukta(fontWeight: FontWeight.bold,fontSize: 19.t),),
                 ],
               ),
@@ -125,6 +149,7 @@ class _HomePageState extends State<HomePage> {
                 if(snapshot.hasData){
                   listProduct = snapshot.data!.list;
                   List<Product> proudct = listProduct.where((e) => e.deleted == false).toList();
+                  proudct.take(100);
                   return _buildGirdView(proudct);
                 }
                 else
@@ -143,15 +168,15 @@ class _HomePageState extends State<HomePage> {
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       physics:  const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 4.0,
-          mainAxisExtent: 300,
+          crossAxisSpacing: 5.w,
+          mainAxisSpacing: 4.0.w,
+          mainAxisExtent: 300.w,
       ),
       itemBuilder: (BuildContext context, int index){
         return Center(
-          child: ProductCart(product: product[index]),
+          child: ProductCart(product: product[index],isFavorite: false,),
         );
       },
   );

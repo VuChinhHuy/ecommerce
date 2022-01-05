@@ -6,7 +6,7 @@ import 'errors.dart';
 
 
 class RestClient {
-  static const TIMEOUT = 30000;
+  static const TIMEOUT = 100000;
   static const ENABLE_LOG = true;
   static const ACCESS_TOKEN_HEADER = 'Authorization';
 

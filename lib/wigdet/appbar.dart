@@ -1,6 +1,8 @@
 
 
 import 'package:ecommerce/dimens.dart';
+import 'package:ecommerce/model/category.dart';
+import 'package:ecommerce/ui/product_in_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,12 +33,16 @@ buildAppBar(){
               toolbarHeight: 24,
               elevation: 0,
               backgroundColor: Colors.transparent,
-              title: Text('MyShop',textAlign: TextAlign.center,style: GoogleFonts.metrophobic(fontSize: 18.t,color: Colors.white)),
-              leading: GestureDetector(
-                onTap: () { /* Write listener code here */ },
-                child: const Icon(
-                  Icons.menu,  // add custom icons also
-                ),
+              title: Text('OGANI',textAlign: TextAlign.center,style: GoogleFonts.metrophobic(fontSize: 18.t,color: Colors.white,fontWeight: FontWeight.bold )),
+              leading: Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.menu),
+                    onPressed: () { Scaffold.of(context).openDrawer(); },
+                    tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+                  );
+                },
               ),
               actions: const [
                 Padding(padding: EdgeInsets.only(right: 16.0),
@@ -72,7 +78,6 @@ buildAppBar(){
                 )],
             ),
             child: TextFormField(
-              obscureText: true,
               decoration: InputDecoration(
                   icon: Padding(
                     padding: EdgeInsets.only(left: 16.w),
@@ -192,5 +197,33 @@ buildSuccess(){
         ],
       ),
     ),
+  );
+}
+
+buildDrawer(List<Category> category){
+  return Drawer(
+    child:
+    Column(
+      children: [
+        DrawerHeader(
+          child: Image.network('http://khoaluantotnghiep.tk/frontend/assets/img/logo.png'),
+        ),
+        Expanded(
+        child:
+        ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: category.length,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (BuildContext context, int index){
+            return ListTile(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ProductInCategory(category: category[index])));
+
+              },
+              title: Text(category[index].name!,style: GoogleFonts.metrophobic(fontSize: 19.t),),
+            );
+            }))
+      ],
+    )
   );
 }

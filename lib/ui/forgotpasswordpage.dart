@@ -23,11 +23,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  IconData(61059, fontFamily: 'MaterialIcons'),
-                  color: Colors.black,
-                  size: 24.w,
-                ),
+                BackButton(),
                 SizedBox(height: 30.w,),
                 Container(
                   padding: EdgeInsets.fromLTRB(6.w, 0, 0, 0),
@@ -62,11 +58,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   clipBehavior: Clip.antiAlias,
                   child: MaterialButton(
                     onPressed: (){},
-                    color: Colors.green,
+                    color: const Color.fromRGBO(52, 40, 62, 0.9),
                     height: 48.w,
                     minWidth: double.infinity,
                     textColor: Colors.white,
-                    child: Text('SEND',style: GoogleFonts.metrophobic(fontSize: 14.t)),
+                    child: Text('S E N D',style: GoogleFonts.metrophobic(fontSize: 14.t)),
                   )
               )
           ),

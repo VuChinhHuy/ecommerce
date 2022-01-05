@@ -8,5 +8,8 @@ class ProductRepository{
   Future<ProductResponse> getProduct(){
     return _productApiProvider.getProduct();
   }
+  Future<Product> getProductId(String id){
+    return _productApiProvider.getProductId(id);
+  }
 
 }

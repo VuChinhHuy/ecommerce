@@ -5,8 +5,12 @@ import 'package:ecommerce/api/review/review_response.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/model/review.dart';
+import 'package:ecommerce/sql/favorite_enity.dart';
+import 'package:ecommerce/sql/favorite_responstory.dart';
+import 'package:ecommerce/sql/product_enity.dart';
 import 'package:ecommerce/ui/cart.dart';
 import 'package:ecommerce/ui/reivewpage.dart';
+import 'package:ecommerce/utils/on_click.dart';
 import 'package:ecommerce/wigdet/build_load.dart';
 import 'package:ecommerce/wigdet/item_product_card.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,15 +29,35 @@ class ProductDetail extends StatefulWidget {
 class _ProductDetailState extends State<ProductDetail> {
   Product product = Product();
   bool expendDetails = false;
-  List<Review> review = List.empty();
+  late bool isFavorite = false;
+  List<Review> review = [];
   var f = NumberFormat('#,###', 'en_US');
   List<Product> productRelated = List.empty();
+
   @override
   initState(){
     super.initState();
-    blocProduct.getProduct();
+    checkFavorite();
     product = widget.productDetails;
-    blocReview.getReviewProduct(product.id.toString());
+    if(!blocReview.subject.isClosed){
+      blocReview.getReviewProduct(product.id.toString());
+    }
+  }
+  @override
+  void dispose(){
+    super.dispose();
+    if(blocReview.subject.isClosed){
+      blocReview.dispose();
+    }
+  }
+
+  checkFavorite() {
+    setState(() {
+      DataResponse().checkFavorite(FavoriteSQL(widget.productDetails.id!, widget.productDetails.name!)).then((value) =>  isFavorite = value);
+    });
+
+
+
   }
   @override
   Widget build(BuildContext context) {
@@ -70,7 +94,7 @@ class _ProductDetailState extends State<ProductDetail> {
                         },
                         spacing: 10,),
                       SizedBox(width: 6.w,),
-                      const Text('10 Review'),
+                      Text('${review.length} Review'),
                     ],
                   ),
                   SizedBox(height: 8.w),
@@ -80,33 +104,31 @@ class _ProductDetailState extends State<ProductDetail> {
                   SizedBox(height: 12.w),
                   Text('${f.format(product.price)} VND',style: GoogleFonts.sansita(fontSize: 25.t)),
                   SizedBox(height: 16.w),
-                  Text('Image Review',style: GoogleFonts.nunito(fontSize: 14.t)),
-                  SizedBox(height: 8.w),
-                  Row(
-                    children: [
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
-                          width: 47.w,
-                          height: 47.w),
-                      SizedBox(width: 12.w),
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
-                          width: 47.w,
-                          height: 47.w),
-                      SizedBox(width: 12.w),
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
-                          width: 47.w,
-                          height: 47.w),
-                      SizedBox(width: 12.w),
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
-                          width: 47.w,
-                          height: 47.w),
-                      SizedBox(width: 12.w),
-                      Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
-                          width: 47.w,
-                          height: 47.w),
-                    ],
-                  )
-
-
+                  // Text('Image Review',style: GoogleFonts.nunito(fontSize: 14.t)),
+                  // SizedBox(height: 8.w),
+                  // Row(
+                  //   children: [
+                  //     Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                  //         width: 47.w,
+                  //         height: 47.w),
+                  //     SizedBox(width: 12.w),
+                  //     Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                  //         width: 47.w,
+                  //         height: 47.w),
+                  //     SizedBox(width: 12.w),
+                  //     Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                  //         width: 47.w,
+                  //         height: 47.w),
+                  //     SizedBox(width: 12.w),
+                  //     Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                  //         width: 47.w,
+                  //         height: 47.w),
+                  //     SizedBox(width: 12.w),
+                  //     Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
+                  //         width: 47.w,
+                  //         height: 47.w),
+                  //   ],
+                  // )
                 ],
               ),
             ),
@@ -169,7 +191,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                   style: GoogleFonts.nunito(fontSize: 19.t,fontWeight: FontWeight.bold),maxLines: 2
                               )),
                               CupertinoButton(onPressed: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ReviewProduct(listReivew: review)));
+                                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ReviewProduct(listReivew: review,product: product)));
                               },
                                 child: Row(
                                   children: const[
@@ -278,7 +300,7 @@ class _ProductDetailState extends State<ProductDetail> {
                           height: 331.w,
                           width: 180.w,
                           child: Center(
-                            child: ProductCart(product: productRelated[index]),
+                            child: ProductCart(product: productRelated[index],isFavorite: false,),
                           )
                         );
                       },
@@ -287,7 +309,7 @@ class _ProductDetailState extends State<ProductDetail> {
                 else return buildLoadingWidget();
               },
             )
-          
+
           ),
           SizedBox(height: 98.w)
         ],
@@ -338,8 +360,33 @@ class _ProductDetailState extends State<ProductDetail> {
                     height: 42.w,
                     minWidth: 42.w,
                     onPressed: (){
-                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => CartPage()));
+                      //
+                      onClickAddToCard(ProductSQL(product.id!, product.name!, 1));
+                      showDialog(context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Add To Card is Success"),
+                          contentPadding: EdgeInsets.all(8.w),
+                          content: Icon(Icons.check_circle,size: 32.w),
+                          actions: [
+                            MaterialButton(
+                                onPressed: (){
+                                  Navigator.of(context).pop();
+                            },
+                              color: Colors.black38,
+                              child: Text('Keep Buying'),
+                            ),
+                            MaterialButton(
+                                onPressed: (){
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => CartPage()));
+                                },
+                            color: Colors.orange,
+                            child: Text('Go to Card'),),
+                          ],
+                        );
 
+                      });
                     },
                     padding: EdgeInsets.all(12.w),
                     child: Text('ADD TO CART')
@@ -355,13 +402,16 @@ class _ProductDetailState extends State<ProductDetail> {
                     height: 42.w,
                     minWidth: 42.w,
                     onPressed: (){
-                      print('click abc');
+                      setState(() {
+                        onCLickFavorite(FavoriteSQL(product.id!, product.name!));
+                        isFavorite = !isFavorite;
+                      });
                       // ),
                     },
                     padding: EdgeInsets.all(12.w),
-                    child: Icon(
+                    child: Icon( isFavorite ? Icons.favorite:
                       Icons.favorite_border,
-                      color:  const Color.fromRGBO(52, 40, 62, 1.0),
+                      color:  isFavorite? Colors.red : const Color.fromRGBO(52, 40, 62, 1.0),
                       size: 20.w,
                     )
                 )
