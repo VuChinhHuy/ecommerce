@@ -15,9 +15,9 @@ import 'category.dart';
 /// createdAt : "2021-12-21T12:40:31.576Z"
 /// updatedAt : "2021-12-21T12:40:31.576Z"
 
-class Product {
+class Product extends Object{
   Product({
-      int? id, 
+      int? id,
       Category? category, 
       Seller? seller, 
       String? name, 
@@ -103,6 +103,11 @@ class Product {
     map['updatedAt'] = _updatedAt;
     return map;
   }
+  @override
+  bool operator==(dynamic other) => identical(this, other) || this.id == other.id;
+
+  @override
+  int get hashCode => id!;
 
 }
 

@@ -26,7 +26,7 @@ class ShopCard extends StatelessWidget {
               padding: EdgeInsets.all(5.w),
               child: Row(
                 children: [
-                  Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/avatars/clothing.png',
+                  Image.network('http://khoaluan.tk/backend/assets/dist/images/avatars/clothing.png',
                   width: 100,
                   height: 100,),
                   SizedBox(width: 8.w,),

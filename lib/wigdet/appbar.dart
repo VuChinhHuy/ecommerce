@@ -2,6 +2,7 @@
 
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/category.dart';
+import 'package:ecommerce/ui/mainpage.dart';
 import 'package:ecommerce/ui/product_in_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ buildAppBar(){
 
 }
 
-buildSuccess(){
+buildSuccess(BuildContext context){
   return Center(
     heightFactor: 360.w,
     child: Container(
@@ -168,7 +169,8 @@ buildSuccess(){
                   color: Colors.amber,
                   splashColor: const Color.fromRGBO(132, 95, 161, 1.0),
                   onPressed: (){
-                    print('click abc');
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Main()),(route)=>false);
+
                     // ),
                   },
                   padding: EdgeInsets.all(12.w),
@@ -206,7 +208,7 @@ buildDrawer(List<Category> category){
     Column(
       children: [
         DrawerHeader(
-          child: Image.network('http://khoaluantotnghiep.tk/frontend/assets/img/logo.png'),
+          child: Image.network('http://khoaluan.tk/frontend/assets/img/logo.png'),
         ),
         Expanded(
         child:

@@ -1,11 +1,11 @@
 
-import 'package:ecommerce/api/product/product_response.dart';
-import 'package:ecommerce/api/product/product_respository.dart';
+
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/cart_bloc.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/product.dart';
-import 'package:ecommerce/sql/favorite_responstory.dart';
-import 'package:ecommerce/sql/product_enity.dart';
 import 'package:ecommerce/ui/checkout.dart';
+import 'package:ecommerce/wigdet/build_load.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -18,39 +18,54 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  List<ProductSQL> productInCard = List.empty();
-  ProductRepository productRepository = ProductRepository();
   var f = NumberFormat('#,###', 'en_US');
   List<Product> listProductCard = [];
+  List<int> quantity = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getData();
+
   }
 
   @override
   void dispose(){
     super.dispose();
-    productInCard.clear();
-    listProductCard.clear();
+    // quantity.clear();
   }
-  getData() async {
-    productInCard = await DataResponse.productDao?.findAllProduct() ?? [];
-    for (var element in productInCard) {
-      setState(() {
-        var product = productRepository.getProductId(element.id.toString());
-        product.then((value) => listProductCard.add(value));
-      });
-    }
-
-  }
+  // getData() async {
+  //   productInCard = await DataResponse.productDao?.findAllProduct() ?? [];
+  //   for (var element in productInCard) {
+  //     blocProduct.getProductId(element.id.toString());
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final CartBloc bloc = BlocProvider.of<CartBloc>(context);
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: StreamBuilder(
+        stream: bloc.outCart,
+        builder: (context,AsyncSnapshot<List<Product>> snapshot){
+          if(snapshot.hasData){
+             listProductCard = snapshot.data!;
+             for(int i = 0; i < snapshot.data!.length;i++ ){
+                 quantity.add(1);
+             }
+            if(listProductCard.isNotEmpty) {
+              return _buildBody();
+            }
+            return const Center(
+              child: Text('NO ITEM IN CART'),
+            );
+          }
+          else {
+
+            return buildLoadingWidget();
+          }
+        },
+      ),
       bottomSheet: _buildBottomSheet(),
     );
   }
@@ -77,11 +92,12 @@ class _CartPageState extends State<CartPage> {
 
   _buildBody()=>ListView.separated(
       itemBuilder: (BuildContext context, int index) {
+        final CartBloc blocCart = BlocProvider.of<CartBloc>(context);
         return Container(
           padding: EdgeInsets.all(5.w),
           child: Row(
             children: [
-              Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/products/${listProductCard[index].thumbnailUrl}',
+              Image.network('http://khoaluan.tk/backend/assets/dist/images/products/${listProductCard[index].thumbnailUrl}',
                 width: 80.w,
                 height: 80.w,
               ),
@@ -101,14 +117,10 @@ class _CartPageState extends State<CartPage> {
                         minWidth: 24.w,
                         onPressed: (){
                           setState(() {
-                            DataResponse.productDao?.updateProduct(ProductSQL(productInCard[index].id, productInCard[index].name, productInCard[index].quantity - 1));
-                            if(productInCard[index].quantity <= 0){
-                              productInCard.remove(productInCard[index]);
-                              listProductCard.remove(listProductCard[index]);
-                              DataResponse.productDao?.deleteProduct(ProductSQL(productInCard[index].id, productInCard[index].name, productInCard[index].quantity));
+                            if(quantity[index] > 1) {
+                              quantity[index] = quantity[index] -1;
                             }
                           });
-                          // ),
                         },
                         padding: EdgeInsets.all(12.w),
                         child: Icon(
@@ -118,7 +130,7 @@ class _CartPageState extends State<CartPage> {
                         )
                     ),
                     SizedBox(width: 2.w,),
-                    Text('${productInCard[index].quantity}',style: GoogleFonts.sansita(fontSize: 19.t)),
+                    Text('${quantity[index]}',style: GoogleFonts.sansita(fontSize: 19.t)),
                     SizedBox(width: 2.w,),
                     MaterialButton(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.w)),
@@ -127,11 +139,10 @@ class _CartPageState extends State<CartPage> {
                         minWidth: 24.w,
                         onPressed: (){
                           setState(() {
-                            DataResponse.productDao?.updateProduct(ProductSQL(productInCard[index].id, productInCard[index].name, productInCard[index].quantity + 1));
+                            quantity[index] = quantity[index] +1;
+                            print(quantity);
+                            print(listProductCard);
                           });
-
-
-                          // ),
                         },
                         padding: EdgeInsets.all(12.w),
                         child: Icon(
@@ -149,12 +160,9 @@ class _CartPageState extends State<CartPage> {
                   height: 24.w,
                   minWidth: 24.w,
                   onPressed: (){
+                    blocCart.inRemoveCart.add(listProductCard[index]);
                     setState(() {
-                      productInCard.remove(productInCard[index]);
-                      DataResponse.productDao?.deleteProduct(ProductSQL(productInCard[index].id, productInCard[index].name, productInCard[index].quantity));
-                      listProductCard.remove(listProductCard[index]);
                     });
-                    // ),
                   },
                   padding: EdgeInsets.all(12.w),
                   child: Icon(
@@ -180,6 +188,7 @@ class _CartPageState extends State<CartPage> {
       child: Container(
         padding: EdgeInsets.all(16.w),
         height: 139.w,
+        width: double.infinity,
         color: Colors.black12,
         child: Column(
           children: [
@@ -187,7 +196,14 @@ class _CartPageState extends State<CartPage> {
               children: [
                 Expanded(child:
                 Text('Total price',style: GoogleFonts.sansita(fontSize: 17.t),)),
-                Text('${f.format(totalPrice())} VND',style: GoogleFonts.sansita(fontSize: 17.t),),
+                FutureBuilder<int>(
+                  future: total(),
+                    builder: (context,AsyncSnapshot<int> snap){
+                    if(snap.hasData) {
+                      return Text('${f.format(snap.data)} VND',style: GoogleFonts.sansita(fontSize: 17.t),);
+                    }
+                    return Text('${f.format(0)} VND',style: GoogleFonts.sansita(fontSize: 17.t),);;
+                }),
               ],
             ),
             SizedBox(height: 16.w),
@@ -211,18 +227,13 @@ class _CartPageState extends State<CartPage> {
         ),
       ),
     );
-
   }
-  totalPrice(){
-    int price = 0;
-    for(var e in productInCard){
-        for(var product in listProductCard){
-          if(e.id == product.id){
-            price += e.quantity * product.price!;
-          }
-        }
-    }
-    return price;
+  Future<int> total() async{
+   int price = 0;
+   for(int i = 0; i < listProductCard.length; i++){
+        price += (quantity[i] * listProductCard[i].price!);
+   }
+   return Future.value(price);
   }
 
 }

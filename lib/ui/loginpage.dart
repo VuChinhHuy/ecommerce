@@ -18,8 +18,8 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordPage()));
   }
   void navigationToMain(){
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Main()));
-
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => Main()));
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Main()),(route)=> false);
   }
 @override
   void dispose() {
@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: 64.w,
                         minWidth: 64.w,
                         child: Icon(
-                          IconData(58062, fontFamily: 'MaterialIcons'),
+                          const IconData(58062, fontFamily: 'MaterialIcons'),
                           color: Colors.red,
                           size: 30.w,
                         )

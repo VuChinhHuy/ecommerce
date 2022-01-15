@@ -1,4 +1,5 @@
 import 'package:ecommerce/dimens.dart';
+import 'package:ecommerce/wigdet/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -82,6 +83,9 @@ class _CheckOutPageState extends State<CheckOutPage> {
                     height: 42.w,
                     minWidth: 343.w,
                     onPressed: (){
+                      showDialog(context: context, builder: (BuildContext context){
+                        return buildSuccess(context);
+                      });
                       // Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => CheckOutPage()));
                     },
                     child:

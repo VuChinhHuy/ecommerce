@@ -28,3 +28,9 @@ onClickAddToCard(ProductSQL productSQL)async{
     print('add product +1');
   }
 }
+
+
+// click add favorite
+handleAddFavorite(FavoriteSQL favoriteSQL) async {
+
+}

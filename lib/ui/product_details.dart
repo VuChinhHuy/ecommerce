@@ -2,15 +2,16 @@ import 'package:ecommerce/api/product/product_bloc.dart';
 import 'package:ecommerce/api/product/product_response.dart';
 import 'package:ecommerce/api/review/bloc_review.dart';
 import 'package:ecommerce/api/review/review_response.dart';
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/cart_bloc.dart';
+import 'package:ecommerce/bloc/favorite_bloc.dart';
+import 'package:ecommerce/bloc/favorite_product_bloc.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/model/review.dart';
-import 'package:ecommerce/sql/favorite_enity.dart';
-import 'package:ecommerce/sql/favorite_responstory.dart';
-import 'package:ecommerce/sql/product_enity.dart';
+import 'package:ecommerce/ui/ar_view_page.dart';
 import 'package:ecommerce/ui/cart.dart';
 import 'package:ecommerce/ui/reivewpage.dart';
-import 'package:ecommerce/utils/on_click.dart';
 import 'package:ecommerce/wigdet/build_load.dart';
 import 'package:ecommerce/wigdet/item_product_card.dart';
 import 'package:flutter/cupertino.dart';
@@ -37,7 +38,6 @@ class _ProductDetailState extends State<ProductDetail> {
   @override
   initState(){
     super.initState();
-    checkFavorite();
     product = widget.productDetails;
     if(!blocReview.subject.isClosed){
       blocReview.getReviewProduct(product.id.toString());
@@ -51,25 +51,32 @@ class _ProductDetailState extends State<ProductDetail> {
     }
   }
 
-  checkFavorite() {
-    setState(() {
-      DataResponse().checkFavorite(FavoriteSQL(widget.productDetails.id!, widget.productDetails.name!)).then((value) =>  isFavorite = value);
-    });
-
-
-
-  }
   @override
   Widget build(BuildContext context) {
+    final FavoriteBloc bloc = BlocProvider.of<FavoriteBloc>(context);
+    final FavoriteProductBloc blocFavorite = FavoriteProductBloc(widget.productDetails);
+    final CartBloc blocCart = BlocProvider.of<CartBloc>(context);
     return Scaffold(
-      bottomSheet: _buildBottomBar(),
+      bottomSheet: _buildBottomBar(bloc,blocFavorite,blocCart),
       body:
       SingleChildScrollView(
       child: Column(
         children: [
-          Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/products/${product.thumbnailUrl}',
-              width: double.infinity,
-              height: 375.w),
+          Stack(
+          children: [
+            Image.network('http://khoaluan.tk/backend/assets/dist/images/products/${product.thumbnailUrl}',
+                width: double.infinity,
+                height: 375.w),
+            Positioned(
+                right: 16.w,
+                bottom: 16.w,
+                child: IconButton(icon: Icon(Icons.view_in_ar,color: Colors.black,size: 32.w,),
+                  onPressed: () { showDialog(context: context, builder: (BuildContext context){
+                    return ARView();
+                  }); },)),
+          ],
+          ),
+
           // Information
           Card(
             elevation: 1.0,
@@ -296,17 +303,20 @@ class _ProductDetailState extends State<ProductDetail> {
                       itemCount: productRelated.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (BuildContext context, int index) {
+                        final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
                         return SizedBox(
                           height: 331.w,
                           width: 180.w,
                           child: Center(
-                            child: ProductCart(product: productRelated[index],isFavorite: false,),
+                            child: ProductCart(product: productRelated[index],onPressed: (){},favoritesStream: favoriteBloc.outFavorites,)
                           )
                         );
                       },
                   );
                 }
-                else return buildLoadingWidget();
+                else {
+                  return buildLoadingWidget();
+                }
               },
             )
 
@@ -317,7 +327,7 @@ class _ProductDetailState extends State<ProductDetail> {
     )
     );
   }
-  _buildBottomBar(){
+  _buildBottomBar(FavoriteBloc bloc,FavoriteProductBloc blocCheckFavorite, CartBloc blocCart){
       return Container(
         height: 98.w,
         width: double.infinity,
@@ -360,8 +370,10 @@ class _ProductDetailState extends State<ProductDetail> {
                     height: 42.w,
                     minWidth: 42.w,
                     onPressed: (){
+                      blocCart.inAddCart.add(product);
                       //
-                      onClickAddToCard(ProductSQL(product.id!, product.name!, 1));
+                      // onClickAddToCard(ProductSQL(product.id!, product.name!, 1));
+
                       showDialog(context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) {
@@ -379,7 +391,9 @@ class _ProductDetailState extends State<ProductDetail> {
                             ),
                             MaterialButton(
                                 onPressed: (){
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => CartPage()));
+                                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
+                                     return CartPage();
+                                  } ));
                                 },
                             color: Colors.orange,
                             child: Text('Go to Card'),),
@@ -393,29 +407,38 @@ class _ProductDetailState extends State<ProductDetail> {
                 )
             )),
             SizedBox(width: 16.w),
-            Material(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.w)),
-                elevation: 8.0,
-                clipBehavior: Clip.antiAlias,
-                child: MaterialButton(
-                    splashColor: const Color.fromRGBO(132, 95, 161, 1.0),
-                    height: 42.w,
-                    minWidth: 42.w,
-                    onPressed: (){
-                      setState(() {
-                        onCLickFavorite(FavoriteSQL(product.id!, product.name!));
-                        isFavorite = !isFavorite;
-                      });
-                      // ),
-                    },
-                    padding: EdgeInsets.all(12.w),
-                    child: Icon( isFavorite ? Icons.favorite:
-                      Icons.favorite_border,
-                      color:  isFavorite? Colors.red : const Color.fromRGBO(52, 40, 62, 1.0),
-                      size: 20.w,
+            StreamBuilder<bool>(
+              initialData: false,
+              stream: blocCheckFavorite.outIsFavorite,
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot){
+                isFavorite = snapshot.data!;
+                return  Material(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.w)),
+                    elevation: 8.0,
+                    clipBehavior: Clip.antiAlias,
+                    child: MaterialButton(
+                        splashColor: const Color.fromRGBO(132, 95, 161, 1.0),
+                        height: 42.w,
+                        minWidth: 42.w,
+                        onPressed: (){
+                          isFavorite? bloc.inRemoveFavorite.add(widget.productDetails) : bloc.inAddFavorite.add(widget.productDetails);
+                          isFavorite = !isFavorite;
+                          // setState(() {
+                          //   // onCLickFavorite(FavoriteSQL(product.id!, product.name!));
+                          // });
+                          // ),
+                        },
+                        padding: EdgeInsets.all(12.w),
+                        child: Icon( isFavorite ? Icons.favorite:
+                        Icons.favorite_border,
+                          color:  isFavorite? Colors.red : const Color.fromRGBO(52, 40, 62, 1.0),
+                          size: 20.w,
+                        )
                     )
-                )
-            )
+                );
+              },
+            ),
+
           ],
         ),
       );

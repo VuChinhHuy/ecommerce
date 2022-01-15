@@ -170,17 +170,8 @@ class _SigupPageState extends State<SigupPage> {
                             return AlertDialog(
                               contentPadding: EdgeInsets.zero,
                               content: Container(
+                                color: Colors.amber,
                                 padding: EdgeInsets.all(16.w),
-                                decoration:  const BoxDecoration(
-                                  gradient:  LinearGradient(
-                                      begin: Alignment.bottomLeft,
-                                      end:  Alignment.topRight,
-                                      colors: [
-                                        Color.fromRGBO(52, 40, 62, 1.0),
-                                        Color.fromRGBO(132, 95, 161, 1.0),
-                                      ]
-                                  ),
-                                ),
                                 child: Text('Please fill full information !!!',style: GoogleFonts.metrophobic(color: Colors.white,fontSize: 19.t),),
                               ),
                             );

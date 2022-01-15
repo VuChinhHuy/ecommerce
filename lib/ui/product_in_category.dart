@@ -2,6 +2,8 @@ import 'package:ecommerce/api/category/category_bloc.dart';
 import 'package:ecommerce/api/category/category_response.dart';
 import 'package:ecommerce/api/product/product_bloc.dart';
 import 'package:ecommerce/api/product/product_response.dart';
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/favorite_bloc.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/category.dart';
 import 'package:ecommerce/model/product.dart';
@@ -141,8 +143,9 @@ class _ProductInCategoryState extends State<ProductInCategory> {
       mainAxisExtent: 300.w,
     ),
     itemBuilder: (BuildContext context, int index){
+      final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
       return Center(
-        child: ProductCart(product: product[index],isFavorite: false,),
+        child: ProductCart(product: product[index], favoritesStream: favoriteBloc.outFavorites, onPressed: () {  },),
       );
     },
   );

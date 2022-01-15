@@ -8,9 +8,12 @@ import 'package:ecommerce/api/category/category_bloc.dart';
 import 'package:ecommerce/api/category/category_response.dart';
 import 'package:ecommerce/api/product/product_bloc.dart';
 import 'package:ecommerce/api/product/product_response.dart';
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/favorite_bloc.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/category.dart';
 import 'package:ecommerce/model/product.dart';
+import 'package:ecommerce/ui/product_details.dart';
 import 'package:ecommerce/wigdet/appbar.dart';
 import 'package:ecommerce/wigdet/build_load.dart';
 import 'package:ecommerce/wigdet/item_product_card.dart';
@@ -53,6 +56,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: buildAppBar(),
       drawer:  StreamBuilder<CategoryResponse>(
@@ -79,19 +83,19 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Container(
                     padding: EdgeInsets.only(top: 16.w) ,
+                    margin: EdgeInsets.zero,
                     width: double.infinity,
                     child: BannerCarousel(
                       banners: [
-                        BannerModel(imagePath: 'https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center', id: '1'),
-                        BannerModel(imagePath: 'https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',id: '2'),
+                        BannerModel(imagePath: 'https://file.hstatic.net/1000400311/file/thuong-mai-dien-tu_da35807170e843d5b480ae781605f90e.jpg', id: '1'),
+                        BannerModel(imagePath: 'https://pkmacbook.com/wp-content/uploads/2021/07/anh-banner-dien-may-khuyen-mai-dip-tet_033704059.png',id: '2'),
                         BannerModel(imagePath: 'https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',id: '3'),
                       ],
                       onTap: (id) => print(id),
                       activeColor: Colors.amberAccent,
                       disableColor: Colors.black12,
                       animation: true,
-                      width: 375.w,
-                      height: 88.w,
+                      //height: 88.w,
                       // customizedBanners: [
                       //   Image.network('https://bn1301files.storage.live.com/y4mgPRi_zzrco4D__oQQS3yGFVRi0SMKRQ8qe4WCydVOqe43BTu6yMhLwflIjo9aINv5_SvdFsefGvoyznb_LuxXuGlKuwpOngN_ZloHlcC-9jqs3OSZ0ni3o75DcshpBVarW_cEEZmi5OjDWyJtaduY-Q_ubZp-Az0t9c01AV-UHbwywSK6xGA5OYjStzC6SeULY4SrOSzaL7KkLamVSlQ4A/6ad832045786af68599877dab7f234b8.jpg?psid=1&width=670&height=670&cropMode=center',
                       //     width: 343.w,
@@ -148,12 +152,13 @@ class _HomePageState extends State<HomePage> {
                 print(snapshot.data);
                 if(snapshot.hasData){
                   listProduct = snapshot.data!.list;
-                  List<Product> proudct = listProduct.where((e) => e.deleted == false).toList();
-                  proudct.take(100);
-                  return _buildGirdView(proudct);
+                  List<Product> product = listProduct.where((e) => e.deleted == false).toList();
+                  product.take(100);
+                  return _buildGirdView(product);
                 }
-                else
+                else {
                   return buildLoadingWidget();
+                }
               },
             )
           ],
@@ -175,28 +180,43 @@ class _HomePageState extends State<HomePage> {
           mainAxisExtent: 300.w,
       ),
       itemBuilder: (BuildContext context, int index){
+        final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
         return Center(
-          child: ProductCart(product: product[index],isFavorite: false,),
+          child: ProductCart(product: product[index],favoritesStream: favoriteBloc.outFavorites,onPressed: (){
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
+              return ProductDetail(productDetails: product[index]);
+            }));
+          }),
         );
       },
   );
-  Widget _builListCategory()=>ListView.builder(
-    itemCount: category.length,
-      scrollDirection: Axis.horizontal,
-      itemBuilder: (BuildContext context, int index){
-        return Container(
-          width: 100.w,
-          height: 100.w,
-          padding: EdgeInsets.only(right: 12.w),
-          child:
-          Column(
-          children: [
-            Image.network('http://khoaluantotnghiep.tk/backend/assets/dist/images/categories/${category[index].icon!}',
-            height: 50.w,
-            width: 50.w),
-             Text('${category[index].name}',maxLines: 2,textAlign: TextAlign.center),
-          ],
-        )
-        );
-      });
+  //
+  // Widget _buildProductCart(
+  //     BuildContext context,
+  //     int index,
+  //     List<Product> product,
+  //     Stream<List<Product>> favoriteStream
+  //     ){
+  //
+  //
+  // }
+  // Widget _builListCategory()=>ListView.builder(
+  //   itemCount: category.length,
+  //     scrollDirection: Axis.horizontal,
+  //     itemBuilder: (BuildContext context, int index){
+  //       return Container(
+  //         width: 100.w,
+  //         height: 100.w,
+  //         padding: EdgeInsets.only(right: 12.w),
+  //         child:
+  //         Column(
+  //         children: [
+  //           Image.network('http://khoaluan.tk/backend/assets/dist/images/categories/${category[index].icon!}',
+  //           height: 50.w,
+  //           width: 50.w),
+  //            Text('${category[index].name}',maxLines: 2,textAlign: TextAlign.center),
+  //         ],
+  //       )
+  //       );
+  //     });
 }

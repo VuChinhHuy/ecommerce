@@ -1,4 +1,7 @@
 
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/cart_bloc.dart';
+import 'package:ecommerce/bloc/favorite_bloc.dart';
 import 'package:ecommerce/sql/favorite_responstory.dart';
 import 'package:ecommerce/ui/homepage.dart';
 import 'package:ecommerce/ui/product_details.dart';
@@ -7,10 +10,20 @@ import 'package:ecommerce/ui/signuppage.dart';
 import 'package:ecommerce/utils/rest_client.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
 
+// void main() {
+//
+//   runApp(const MyApp());
+// }
+
+Future<void> main()async{
+  RestClient().init('http://khoaluan.tk/api');
+  // DataResponse().initDatabase();
+  return runApp(
+    BlocProvider<FavoriteBloc>(bloc: FavoriteBloc(),child:
+      BlocProvider<CartBloc>(bloc: CartBloc(),child: MyApp(),),)
+  );
+}
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -18,9 +31,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    RestClient().init('http://khoaluantotnghiep.tk/api');
-    DataResponse().initDatabase();
-    return MaterialApp(
+
+    return  MaterialApp(
       initialRoute: '/',
       routes: {
         '/homepage':(context) => HomePage(),
@@ -39,7 +51,7 @@ class MyApp extends StatelessWidget {
       //   // is not restarted.
       //   primarySwatch: Colors.blue,
       // ),
-      home: const SigupPage(),
+      home: SigupPage(),
     );
   }
 }

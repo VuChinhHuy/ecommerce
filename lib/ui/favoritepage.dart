@@ -1,5 +1,7 @@
 import 'package:ecommerce/api/product/product_bloc.dart';
 import 'package:ecommerce/api/product/product_response.dart';
+import 'package:ecommerce/bloc/bloc_provider.dart';
+import 'package:ecommerce/bloc/favorite_bloc.dart';
 import 'package:ecommerce/dimens.dart';
 import 'package:ecommerce/model/product.dart';
 import 'package:ecommerce/sql/favorite_enity.dart';
@@ -18,21 +20,32 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
   List<FavoriteSQL> favoriteSql = [];
+  List<Product> list = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getFavoriteData();
   }
-  getFavoriteData() async{
-    favoriteSql = await DataResponse.favoriteDao?.findAllFavorite() ?? [];
-    setState(() {
 
-    });
+  @override
+  void dispose(){
+    super.dispose();
+    blocProduct.dispose();
+  }
+  getFavoriteData() async{
+    // favoriteSql = await DataResponse.favoriteDao?.findAllFavorite() ?? [];
+    // for (var element in favoriteSql)  {
+    //   blocProduct.getProductId(element.id.toString());
+    // }
+    // setState(() {
+    //
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
+    final FavoriteBloc bloc = BlocProvider.of<FavoriteBloc>(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading:false,
@@ -58,38 +71,58 @@ class _FavoritePageState extends State<FavoritePage> {
           children: [
             Container(
               padding:  EdgeInsets.fromLTRB(16.w, 24.w, 16.w, 0.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(child:
-                  Text('${favoriteSql.length} Items')
-                  ),
-                  Text('Sort by: '),
+              child: StreamBuilder<int>(
+                initialData: 0,
+                stream: bloc.outTotalFavorites,
+                builder: (context, AsyncSnapshot<int> snap){
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(child:
+                      Text('${snap.data} Items')
+                      ),
+                      Text('Sort by: '),
 
-                ],
-              ),
+                    ],
+                  );
+                },
+              )
             ),
             Container(
               padding: EdgeInsets.fromLTRB(5.w, 47.w, 5.w, 0),
-                child: StreamBuilder<ProductResponse>(
-                  stream: blocProduct.subject.stream,
-                  builder: (context,AsyncSnapshot<ProductResponse> snapshot){
-                    if(snapshot.hasData){
-                      List<Product> listProduct = snapshot.data!.list;
-                      List<Product> listFavorite =[];
-                      if(favoriteSql.isNotEmpty){
-                        for (var e in favoriteSql) {
-                          listFavorite.addAll(listProduct.where((element) => element.id == e.id));
-                        }
-                        return  _buildGirdView(listFavorite);
-                      }
-                      return Center(
+                // child: StreamBuilder<Product>(
+                //   // stream: blocProduct.product.stream,
+                //   builder: (context,AsyncSnapshot<Product> snapshot){
+                //     if(snapshot.hasData){
+                //       if(favoriteSql.isNotEmpty){
+                //         list.add(snapshot.data!);
+                //         return  _buildGirdView(list);
+                //       }
+                //       return const Center(
+                //         child: Text('NO ITEM IS FAVORITE'),
+                //       );
+                //     }
+                //     else {
+                //
+                //       return buildLoadingWidget();
+                //     }
+                //   },
+                // ),
+              child: StreamBuilder(
+                stream: bloc.outFavorites,
+                builder: (context,AsyncSnapshot<List<Product>> snapshot){
+                  if(snapshot.hasData){
+                    print(snapshot.data);
+                    if(snapshot.data!.isEmpty || snapshot.data!.length == 0) {
+                      return const Center(
                         child: Text('NO ITEM IS FAVORITE'),
                       );
                     }
-                    else return buildLoadingWidget();
-                  },
-                ),
+                     return _buildGirdView(snapshot.data!);
+                  }
+                  return buildLoadingWidget();
+                },
+              ),
             )
           ],
         )
@@ -98,6 +131,7 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   _buildGirdView(List<Product> productFavorite)=>GridView.builder(
+
     itemCount: productFavorite.length,
     gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: 2,
@@ -106,7 +140,8 @@ class _FavoritePageState extends State<FavoritePage> {
       mainAxisExtent: 311.w,
     ),
     itemBuilder: (BuildContext context, int index){
-      return ProductCart(product: productFavorite[index],isFavorite: true,);
+      final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
+      return ProductCart(product: productFavorite[index],favoritesStream: favoriteBloc.outFavorites,onPressed: (){});
     },
   );
 }

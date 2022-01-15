@@ -48,6 +48,8 @@ dependencies:
   group_button: ^4.0.0+1
   floor: ^1.2.0
   pbkdf2ns: ^0.0.2
+  arkit_plugin: ^1.0.5
+
 
 dev_dependencies:
   flutter_test:
